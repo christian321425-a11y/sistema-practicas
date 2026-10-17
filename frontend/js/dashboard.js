@@ -49,4 +49,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    // --- 3. LÓGICA PARA ENVIAR LAS HORAS A LA BASE DE DATOS ---
+    const formRegistro = document.getElementById('form-registro-horas');
+
+    if (formRegistro) {
+        formRegistro.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página intente recargarse al enviar
+
+            // 1. Obtenemos el ID del estudiante que inició sesión
+            const usuario = JSON.parse(localStorage.getItem('usuarioLogueado'));
+            
+            // 2. Capturamos lo que escribió en la ventana emergente
+            const fecha = document.getElementById('fecha').value;
+            const horas = document.getElementById('cantidad-horas').value;
+            const descripcion = document.getElementById('descripcion').value;
+
+            try {
+                // 3. Enviamos los datos al servidor
+                const response = await fetch('http://localhost:3000/api/horas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        estudiante_id: usuario.id,
+                        horas: horas,
+                        descripcion: descripcion,
+                        fecha: fecha
+                    })
+                });
+
+                const data = await response.json();
+
+                // 4. Mostramos el resultado y cerramos la ventana
+                if (data.exito) {
+                    alert('✅ ' + data.mensaje);
+                    formRegistro.reset(); // Limpia los campos
+                    document.getElementById('modal-horas').style.display = 'none'; // Cierra la ventana
+                } else {
+                    alert('❌ Error: ' + data.mensaje);
+                }
+            } catch (error) {
+                console.error('Error al guardar horas:', error);
+                alert('❌ Error de conexión con el servidor. Verifica que Node esté encendido.');
+            }
+        });
+    }
 });
