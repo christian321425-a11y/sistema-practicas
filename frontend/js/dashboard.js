@@ -79,13 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                // 4. Mostramos el resultado y cerramos la ventana
+               // 4. Mostramos el resultado y cerramos la ventana
                 if (data.exito) {
-                    alert('✅ ' + data.mensaje);
                     formRegistro.reset(); // Limpia los campos
-                    document.getElementById('modal-horas').style.display = 'none'; // Cierra la ventana
+                    document.getElementById('modal-horas').style.display = 'none'; // Cierra la ventana silenciosamente
                 } else {
-                    alert('❌ Error: ' + data.mensaje);
+                    alert('❌ Error: ' + data.mensaje); // Dejamos solo la de error por si algo falla
                 }
             } catch (error) {
                 console.error('Error al guardar horas:', error);
