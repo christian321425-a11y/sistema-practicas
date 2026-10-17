@@ -20,13 +20,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (data.exito) {
-            // Si todo está bien, mostramos una alerta y guardamos sus datos
-            alert(`¡Bienvenido ${data.usuario.nombres}! Ingresaste como ${data.usuario.rol}`);
+     if (data.exito) {
+            // Guardamos sus datos en el navegador
             localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
             
-            // Aquí en el futuro lo enviaremos a su respectivo dashboard
-            // window.location.href = `dashboard-${rol}.html`;
+            // Lo redirigimos a su panel correspondiente
+            window.location.href = `dashboard-${rol}.html`;
         } else {
             // Si el servidor dice que los datos están mal, mostramos el error
             mensajeError.textContent = data.mensaje;

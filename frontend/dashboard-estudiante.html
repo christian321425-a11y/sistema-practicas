@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Estudiante - Prácticas UNIBE</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+    
+    <nav class="navbar">
+        <h2>Sistema de Prácticas</h2>
+        <div class="user-menu">
+            <span id="nombre-usuario">Cargando usuario...</span>
+            <button id="btn-cerrar-sesion" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Bienvenido a tu Panel de Estudiante</h1>
+            <p>Aquí podrás gestionar tus horas de prácticas preprofesionales.</p>
+        </header>
+
+        <div class="dashboard-cards">
+            <!-- Tarjeta 1: Resumen -->
+            <div class="card">
+                <h3>Horas Registradas</h3>
+                <p class="big-number">0 / 400</p>
+                <p class="status pending">Pendiente de asignación de empresa</p>
+            </div>
+
+            <!-- Tarjeta 2: Acciones rápidas -->
+            <div class="card">
+                <h3>Acciones</h3>
+                <button class="btn-action">Registrar nuevas horas</button>
+                <button class="btn-action">Ver mi historial</button>
+            </div>
+            
+            <!-- Tarjeta 3: Alerta -->
+            <div class="card alert-card">
+                <h3>¿Problemas en tu práctica?</h3>
+                <p>Si sufres acoso o te piden realizar actividades fuera de tu profesión, repórtalo aquí.</p>
+                <button class="btn-danger">Generar Alerta</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

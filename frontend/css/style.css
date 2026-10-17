@@ -71,3 +71,98 @@ button:hover {
     margin-top: 15px;
     font-size: 14px;
 }
+
+/* --- ESTILOS DEL DASHBOARD --- */
+.dashboard-body {
+    display: block; /* Sobrescribe el flex del login */
+    height: auto;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    background-color: #003366;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-logout {
+    margin-top: 0;
+    padding: 8px 15px;
+    background-color: #dc3545;
+    width: auto;
+}
+
+.btn-logout:hover {
+    background-color: #c82333;
+}
+
+.dashboard-container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.big-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #0056b3;
+    margin: 15px 0;
+}
+
+.status.pending {
+    color: #856404;
+    background-color: #fff3cd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.btn-action {
+    background-color: #e9ecef;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.btn-action:hover {
+    background-color: #dde0e3;
+}
+
+.alert-card {
+    border-left: 5px solid #dc3545;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
