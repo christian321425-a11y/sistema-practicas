@@ -59,6 +59,31 @@ app.post('/api/horas', async (req, res) => {
     }
 });
 
+// Ruta para obtener el progreso de horas según la carrera del estudiante
+app.get('/api/progreso/:estudiante_id', async (req, res) => {
+    const { estudiante_id } = req.params;
+
+    try {
+        const [rows] = await pool.query(`
+            SELECT 
+                c.nombre AS nombre_carrera,
+                c.horas_requeridas,
+                COALESCE((SELECT SUM(horas_realizadas) FROM registro_horas WHERE estudiante_id = u.id AND estado_validacion != 'rechazada'), 0) AS total_horas
+            FROM usuarios u
+            LEFT JOIN carreras c ON u.carrera_id = c.id
+            WHERE u.id = ?
+        `, [estudiante_id]);
+
+        if (rows.length > 0) {
+            res.json({ exito: true, datos: rows[0] });
+        } else {
+            res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error al obtener progreso:', error);
+        res.status(500).json({ exito: false, mensaje: 'Error al consultar el progreso' });
+    }
+});
 
 
 const PORT = process.env.PORT || 3000;

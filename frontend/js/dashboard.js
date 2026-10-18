@@ -19,6 +19,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Botón de cerrar sesión
     document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
+        // --- NUEVA FUNCIÓN: CARGAR PROGRESO Y CARRERA ---
+        const cargarProgreso = async () => {
+            try {
+                // Llamamos al servidor con el ID del estudiante
+                const response = await fetch(`http://localhost:3000/api/progreso/${usuario.id}`);
+                const data = await response.json();
+
+                if (data.exito) {
+                    // Actualizamos el nombre de la carrera en la cabecera
+                    document.getElementById('nombre-carrera').textContent = data.datos.nombre_carrera || 'No asignada';
+                    
+                    // Actualizamos el contador de horas con su meta específica
+                    document.getElementById('contador-horas').textContent = `${data.datos.total_horas} / ${data.datos.horas_requeridas}`;
+                }
+            } catch (error) {
+                console.error('Error al cargar el progreso:', error);
+                document.getElementById('contador-horas').textContent = `Error al cargar`;
+            }
+        };
+
+        // Ejecutamos la función apenas entra al panel
+        cargarProgreso();
         localStorage.removeItem('usuarioLogueado');
         window.location.href = 'index.html';
     });
