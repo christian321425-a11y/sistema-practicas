@@ -67,7 +67,7 @@ app.get('/api/progreso/:estudiante_id', async (req, res) => {
         const [rows] = await pool.query(`
             SELECT 
                 c.nombre AS nombre_carrera,
-                c.horas_requeridas,
+                c.horas_requeridas AS meta_horas,
                 COALESCE((SELECT SUM(horas_realizadas) FROM registro_horas WHERE estudiante_id = u.id AND estado_validacion != 'rechazada'), 0) AS total_horas
             FROM usuarios u
             LEFT JOIN carreras c ON u.carrera_id = c.id
@@ -85,6 +85,21 @@ app.get('/api/progreso/:estudiante_id', async (req, res) => {
     }
 });
 
+// Ruta para obtener el historial de horas de un estudiante
+app.get('/api/historial/:estudiante_id', async (req, res) => {
+    const { estudiante_id } = req.params;
+
+    try {
+        const [rows] = await pool.query(
+            'SELECT fecha_registro, horas_realizadas, descripcion_actividades, estado_validacion FROM registro_horas WHERE estudiante_id = ? ORDER BY fecha_registro DESC',
+            [estudiante_id]
+        );
+        res.json({ exito: true, historial: rows });
+    } catch (error) {
+        console.error('Error al obtener historial:', error);
+        res.status(500).json({ exito: false, mensaje: 'Error al consultar el historial' });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

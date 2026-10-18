@@ -26,6 +26,7 @@
             <!-- Tarjeta 1: Resumen -->
             <div class="card">
                 <h3>Horas Registradas</h3>
+                <!-- AQUÍ ESTÁ EL ID CORRECTO PARA EL CONTADOR -->
                 <p class="big-number" id="contador-horas">0 / Cargando...</p>
                 <p class="status pending">Pendiente de asignación de empresa</p>
             </div>
@@ -34,7 +35,7 @@
             <div class="card">
                 <h3>Acciones</h3>
                 <button id="btn-registrar-horas" class="btn-action">Registrar nuevas horas</button>
-                <button class="btn-action">Ver mi historial</button>
+                <button id="btn-ver-historial" class="btn-action">Ver mi historial</button>
             </div>
             
             <!-- Tarjeta 3: Alerta -->
@@ -46,12 +47,7 @@
         </div>
     </main>
 
-    <script src="js/dashboard.js"></script>
-</body>
-
-<!-- ... (aquí arriba están las tarjetas del dashboard) ... -->
-
-    <!-- Ventana emergente (Modal) para registrar horas -->
+    <!-- Ventana emergente (Modal) para registrar horas ADENTRO DEL BODY -->
     <div id="modal-horas" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
@@ -74,7 +70,30 @@
         </div>
     </div>
 
-    <!-- El script DEBE ir después del modal -->
+    <!-- Ventana emergente (Modal) para el Historial -->
+    <div id="modal-historial" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close-btn" id="close-historial">&times;</span>
+            <h2>Mi Historial de Prácticas</h2>
+            <div style="overflow-x: auto;">
+                <table class="tabla-historial">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Horas</th>
+                            <th>Actividad</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body-historial">
+                        <!-- Aquí insertaremos los datos con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- El script va justo antes de cerrar el body -->
     <script src="js/dashboard.js"></script>
 </body>
 </html>
