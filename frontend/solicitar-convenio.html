@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Convenio - Prácticas UNIB.E</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilos específicos para la página de solicitud pública */
+        .solicitud-body {
+            background-color: #f4f7f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .solicitud-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .solicitud-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .solicitud-header h1 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Ocupa las dos columnas enteras */
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .seccion-documento {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 2px dashed #003366;
+            text-align: center;
+        }
+
+        .btn-descargar {
+            display: inline-block;
+            background-color: orange;
+            color: black;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid red;
+        }
+
+        .btn-enviar {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .btn-enviar:hover {
+            background-color: #002244;
+        }
+
+        .volver-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="solicitud-body">
+
+    <div class="solicitud-container">
+        <div class="solicitud-header">
+            <h1>Solicitud de Convenio de Prácticas</h1>
+            <p>Complete los datos de su institución para iniciar el proceso de convenio con la UNIB.E.</p>
+        </div>
+
+        <form id="form-solicitud-convenio">
+            
+            <h3>1. Datos de la Institución</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="razon-social">Nombre o Razón Social:</label>
+                    <input type="text" id="razon-social" required placeholder="Nombre legal completo de la empresa">
+                </div>
+
+                <div class="form-group">
+                    <label for="ruc">RUC:</label>
+                    <input type="text" id="ruc" required placeholder="Número de RUC">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo-empresa">Tipo de Empresa:</label>
+                    <select id="tipo-empresa" required style="width: 100%; padding: 10px;">
+                        <option value="">Seleccione un tipo...</option>
+                        <option value="Pública">Pública</option>
+                        <option value="Privada">Privada</option>
+                        <option value="Mixta">Mixta</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="direccion">Dirección y Ciudad:</label>
+                    <input type="text" id="direccion" required placeholder="Ubicación física completa">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="actividad">Actividad de la Empresa:</label>
+                    <textarea id="actividad" rows="3" required placeholder="Breve descripción a qué se dedica su organización"></textarea>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">2. Datos del Tutor Empresarial</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="contacto-nombre">Nombre de la Persona de Contacto:</label>
+                    <input type="text" id="contacto-nombre" required placeholder="Nombres y Apellidos">
+                </div>
+
+                <div class="form-group">
+                    <label for="contacto-cargo">Cargo del Contacto:</label>
+                    <input type="text" id="contacto-cargo" required placeholder="Ej. Gerente de Recursos Humanos">
+                </div>
+
+                <div class="form-group">
+                    <label for="contacto-telefono">Teléfono:</label>
+                    <input type="text" id="contacto-telefono" required placeholder="Teléfono de contacto directo">
+                </div>
+
+                <div class="form-group">
+                    <label for="contacto-correo">Correo Electrónico:</label>
+                    <input type="email" id="contacto-correo" required placeholder="Correo oficial">
+                </div>
+            </div>
+
+            <div class="seccion-documento">
+                <h3>3. Firma del Documento</h3>
+                <p>Para concluir su solicitud, descargue el modelo de convenio, fírmelo legalmente y súbalo en formato PDF.</p>
+                
+                <!-- IMPORTANTE: El atributo download fuerza al navegador a descargar el archivo -->
+                <a href="documents/FORMATO CONSTANCIA DE HORAS DE TUTORIAS.pdf" download class="btn-descargar">
+                    📥 1. Descargar Formato de Convenio
+                </a>
+
+                <div class="form-group" style="margin-top: 20px; text-align: left;">
+                    <label for="documento-firmado"><strong>2. Subir Documento Firmado (Solo PDF):</strong></label>
+                    <input type="file" id="documento-firmado" accept="application/pdf" required style="margin-top: 10px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-enviar">Enviar Solicitud de Convenio</button>
+            <a href="index.html" class="volver-link">Volver al Inicio</a>
+        </form>
+    </div>
+
+    <!-- Ventana emergente (Modal) de Éxito -->
+    <div id="modal-exito" class="modal">
+        <div class="modal-content" style="text-align: center; max-width: 500px;">
+            <h2 style="color: #155724; margin-bottom: 15px;">✅ ¡Solicitud enviada con éxito!</h2>
+            <p style="font-size: 16px; margin-bottom: 20px;">Guarde su código de seguimiento para futuros trámites:</p>
+            
+            <div style="background-color: #e2e3e5; padding: 15px; border: 2px dashed #003366; font-size: 28px; font-weight: bold; letter-spacing: 2px; margin-bottom: 20px; color: #003366;" id="codigo-generado">
+                <!-- Aquí se inyectará el código con JS -->
+            </div>
+            
+            <p style="margin-bottom: 30px; font-size: 14px; color: #666;">Úselo para consultar el estado de su solicitud en la página principal.</p>
+            <button type="button" id="btn-aceptar-exito" class="btn-enviar" style="width: auto; padding: 10px 40px; margin-top: 0;">Entendido y Volver</button>
+        </div>
+    </div>
+
+    <!-- El script lo crearemos en el siguiente paso -->
+    <script src="js/solicitud.js"></script>
+</body>
+</html>

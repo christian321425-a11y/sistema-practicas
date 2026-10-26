@@ -21,15 +21,24 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
 
      if (data.exito) {
-            // Guardamos sus datos en el navegador
-            localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
-            
-            // Lo redirigimos a su panel correspondiente
-            window.location.href = `dashboard-${rol}.html`;
-        } else {
-            // Si el servidor dice que los datos están mal, mostramos el error
-            mensajeError.textContent = data.mensaje;
-        }
+                // Guardamos los datos del usuario en el navegador (Local Storage)
+                localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
+                
+                // REDIRECCIÓN INTELIGENTE SEGÚN EL ROL
+                if (data.usuario.rol === 'admin') {
+                    window.location.href = 'dashboard-admin.html';
+                } else if (data.usuario.rol === 'estudiante') {
+                    window.location.href = 'dashboard-estudiante.html';
+                } else {
+                    // Por si luego agregamos el rol tutor
+                    alert('Rol no reconocido por el sistema.');
+                }
+                
+            } else {
+                // Si la cédula o contraseña son incorrectas, mostramos el error
+                mensajeDiv.textContent = data.mensaje;
+                mensajeDiv.style.color = 'red';
+            }
     } catch (error) {
         mensajeError.textContent = 'Error al conectar con el servidor. ¿Está encendido XAMPP y Node?';
         console.error(error);

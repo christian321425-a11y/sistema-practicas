@@ -3,37 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Gestión de Prácticas</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Portal de Prácticas - UNIB.E</title>
+    
+    <style>
+        /* Estilos específicos para el Portal Público basados en el boceto */
+        .portal-body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #003366; /* Color de fondo base en caso de que no cargue la imagen */
+            /* Aquí idealmente pondrás la ruta a la foto del edificio de la UNIB.E */
+            background-image: url('../assets/fondo_UNIBE.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Capa oscura para que el texto resalte sobre la foto del edificio */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 51, 102, 0.7);
+            z-index: 1;
+        }
+
+        .portal-nav {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .portal-logo {
+			width: 250px;  
+			height: 75px;  
+			background-image: url('../logos/LOGO-UNIBE.png');
+			background-size: contain; 
+			background-repeat: no-repeat; 
+			background-position: center left; 
+		}
+
+        .portal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-portal {
+            background-color: orange;
+            color: black;
+            border: 1px solid red;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .portal-content {
+            position: relative;
+            z-index: 2;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            padding-left: 50px;
+        }
+
+        .info-box {
+            background-color: orange;
+            border: 2px solid red;
+            padding: 40px;
+            max-width: 500px;
+            color: black;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .btn-ayuda {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background-color: orange;
+            color: black;
+            border: 2px solid red;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            z-index: 2;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-    <div class="login-container">
-        <h2>Sistema de Prácticas Preprofesionales</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="cedula">Usuario (Cédula):</label>
-                <input type="text" id="cedula" name="cedula" required placeholder="Ingrese su cédula">
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required placeholder="Ingrese su contraseña">
-            </div>
+<body class="portal-body">
+    <div class="overlay"></div>
 
-            <div class="form-group">
-                <label for="rol">Ingresar como:</label>
-                <select id="rol" name="rol" required>
-                    <option value="estudiante">Estudiante</option>
-                    <option value="tutor">Tutor de Empresa</option>
-                    <option value="admin">Administrador</option>
-                </select>
-            </div>
+    <nav class="portal-nav">
+        <!-- Logo[cite: 10] -->
+        <div class="portal-logo"></div>
+        
+        <!-- Botones superiores[cite: 10] -->
+        <div class="portal-actions">
+            <!-- Este botón ahora te lleva al login que acabamos de renombrar -->
+            <a href="login.html" class="btn-portal">Login</a>
+            <a href="solicitar-convenio.html" class="btn-portal">Solicitar Convenio</a>
+            <a href="consultar-estado.html" class="btn-portal">Consultar Estado de Solicitud</a>
+        </div>
+    </nav>
 
-            <button type="submit">Iniciar Sesión</button>
-        </form>
-        <p id="mensaje-error" class="error-msg"></p>
-    </div>
+    <main class="portal-content">
+        <!-- Cuadro de información[cite: 10] -->
+        <div class="info-box">
+            <p>info del sistema y del proceso de prácticas preprofesionales</p>
+        </div>
+    </main>
 
-    <script src="js/auth.js"></script>
+    <!-- Botón de ayuda flotante[cite: 10] -->
+    <div class="btn-ayuda">ayuda</div>
+
 </body>
 </html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Estado - Prácticas UNIB.E</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .consulta-body {
+            background-color: #f4f7f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .consulta-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .input-codigo {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .resultado-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .estado-pendiente { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .estado-aprobada { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .estado-rechazada { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body class="consulta-body">
+
+    <div class="consulta-container">
+        <h1 style="color: #003366; margin-bottom: 10px;">Rastreo de Solicitud</h1>
+        <p style="color: #666; margin-bottom: 30px;">Ingrese su código de seguimiento (Ej: REQ-A1B2C3)</p>
+
+        <form id="form-consulta">
+            <input type="text" id="codigo-input" class="input-codigo" placeholder="REQ-XXXXXX" required>
+            <button type="submit" class="btn-enviar" style="width: 100%; padding: 15px; background-color: orange; color: black; border: 1px solid red; font-weight: bold; font-size: 16px; cursor: pointer;">Consultar Estado</button>
+        </form>
+
+        <div id="resultado-consulta" class="resultado-box">
+            <!-- Aquí se inyecta el resultado con JS -->
+        </div>
+
+        <a href="index.html" style="display: block; margin-top: 20px; color: #003366; text-decoration: none;">Volver al Inicio</a>
+    </div>
+
+    <script src="js/consulta.js"></script>
+</body>
+</html>

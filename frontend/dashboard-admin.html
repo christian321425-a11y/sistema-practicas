@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - Prácticas UNIB.E</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-body">
+    
+    <nav class="navbar">
+        <h2>Sistema de Prácticas - Admin</h2>
+        <div class="user-menu">
+            <span id="nombre-admin">Cargando administrador...</span>
+            <button id="btn-cerrar-sesion" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Panel de Control de Coordinación</h1>
+            <p>Gestión global de estudiantes, empresas y tutores.</p>
+        </header>
+
+        <div class="dashboard-cards">
+            <!-- Tarjeta 1: Empresas -->
+            <div class="card">
+                <h3>Empresas Aliadas</h3>
+                <p class="big-number" id="contador-empresas">0</p>
+                <p style="color: #666; font-size: 14px;">Convenios aprobados</p>
+            </div>
+
+            <!-- Tarjeta 2: Estudiantes -->
+            <div class="card">
+                <h3>Estudiantes en Prácticas</h3>
+                <p class="big-number" id="contador-estudiantes">0</p>
+                <button class="btn-action" id="btn-nuevo-estudiante">Registrar Estudiante</button>
+            </div>
+            
+            <!-- Tarjeta 3: Tutores -->
+            <div class="card">
+                <h3>Tutores Empresariales</h3>
+                <p class="big-number" id="contador-tutores">0</p>
+                <p style="color: #666; font-size: 14px;">Cuentas registradas</p>
+            </div>
+        </div>
+
+        <!-- Botones de Pestañas (Tabs) -->
+        <div style="display: flex; gap: 10px; margin-top: 30px; margin-bottom: 15px;">
+            <button id="btn-tab-convenios" class="btn-tab activo" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #003366; color: white; font-size: 16px;">Convenios</button>
+            <button id="btn-tab-estudiantes" class="btn-tab" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #e9ecef; color: #333; font-size: 16px;">Estudiantes</button>
+            <button id="btn-tab-tutores" class="btn-tab" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #e9ecef; color: #333; font-size: 16px;">Tutores</button>
+        </div>
+        </div>
+
+        
+
+        <!-- SECCIÓN 1: TABLA DE CONVENIOS -->
+        <div id="seccion-convenios" class="card" style="margin-top: 0; border-top-left-radius: 0; overflow-x: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Gestor de Solicitudes de Convenio</h3>
+                
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text" id="input-buscar" placeholder="Buscar por empresa, RUC..." style="padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 280px; outline: none;">
+                        <span style="position: absolute; right: 10px; pointer-events: none; font-size: 15px; color: #666;">🔍</span>
+                    </div>
+                    <button id="btn-actualizar-tabla" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center;" title="Actualizar datos">🔄</button>
+                    <button id="btn-eliminar-seleccion" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center;" title="Eliminar seleccionados">🗑️</button>
+                </div>
+            </div>
+            
+            <table class="tabla-historial" id="tabla-solicitudes">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">✔</th>
+                        <th>Código</th>
+                        <th>Empresa (RUC)</th>
+                        <th>Contacto</th>
+                        <th>Documento</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-solicitudes">
+                    <tr><td colspan="7" style="text-align: center;">Cargando solicitudes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECCIÓN 2: TABLA DE ESTUDIANTES (Oculta por defecto) -->
+        <div id="seccion-estudiantes" class="card" style="margin-top: 0; border-top-left-radius: 0; overflow-x: auto; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Gestor de Estudiantes en Prácticas</h3>
+                
+                <!-- Barra de herramientas de estudiantes -->
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button id="btn-abrir-asignar" style="background-color: #ffc107; color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap;">+ Asignar a Empresa</button>
+                    
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text" id="input-buscar-estudiante" placeholder="Buscar por cédula, nombre..." style="padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 280px; outline: none;">
+                        <span style="position: absolute; right: 10px; pointer-events: none; font-size: 15px; color: #666;">🔍</span>
+                    </div>
+                    <button id="btn-actualizar-estudiantes" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center;" title="Actualizar datos">🔄</button>
+                    <button id="btn-eliminar-estudiantes" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; display: flex; align-items: center;" title="Eliminar seleccionados">🗑️</button>
+                </div>
+            </div>
+            
+            <table class="tabla-historial" id="tabla-estudiantes">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">✔</th>
+                        <th>Cédula</th>
+                        <th>Nombres y Apellidos</th>
+                        <th>Carrera</th>
+                        <th>Correo</th>
+                        <th>Progreso Horas (Hechas / Meta)</th>
+                        <th>Empresa Asignada</th>
+                        <th>Tiempo Pasantía</th>
+                        <th>Horas Faltantes</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-estudiantes">
+                    <tr><td colspan="9" style="text-align: center;">Cargando estudiantes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- SECCIÓN 3: TABLA DE TUTORES (Oculta por defecto) -->
+        <div id="seccion-tutores" class="card" style="margin-top: 0; border-top-left-radius: 0; overflow-x: auto; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Gestor de Tutores Empresariales</h3>
+                
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button id="btn-nuevo-tutor" style="background-color: #ffc107; color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap;"> + Nuevo Tutor </button>
+                    
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="text" id="input-buscar-tutor" placeholder="Buscar tutor..." style="padding: 8px 35px 8px 12px; border: 1px solid #ccc; border-radius: 4px; width: 220px; outline: none;">
+                        <span style="position: absolute; right: 10px; pointer-events: none; font-size: 15px; color: #666;">🔍</span>
+                    </div>
+                    <button id="btn-actualizar-tutores" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;" title="Actualizar">🔄</button>
+                    <button id="btn-eliminar-tutores" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;" title="Eliminar seleccionados">🗑️</button>
+                </div>
+            </div>
+            
+            <table class="tabla-historial" id="tabla-tutores">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">✔</th>
+                        <th>Cédula</th>
+                        <th>Nombres y Apellidos</th>
+                        <th>Correo</th>
+                        <th>Estado de Cuenta</th>
+                        <th>Empresa Vinculada</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-tutores">
+                    <tr><td colspan="7" style="text-align: center;">Cargando tutores...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Ventana emergente (Modal) para ver Detalles de Contacto -->
+    <div id="modal-info-contacto" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-info-contacto">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 20px;">Información de la Empresa</h2>
+            
+            <div style="text-align: left; line-height: 1.8; font-size: 15px;">
+                <p><strong>Dirección:</strong> <span id="info-direccion"></span></p>
+                <p><strong>Actividad:</strong> <span id="info-actividad"></span></p>
+                
+                <hr style="margin: 20px 0; border: 1px solid #eee;">
+                
+                <h3 style="color: #003366; margin-bottom: 15px;">Tutor Empresarial (Contacto)</h3>
+                <p><strong>Nombre:</strong> <span id="info-nombre"></span></p>
+                <p><strong>Cargo:</strong> <span id="info-cargo"></span></p>
+                <p><strong>Teléfono:</strong> <span id="info-telefono"></span></p>
+                <p><strong>Correo:</strong> <span id="info-correo"></span></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ventana emergente (Modal) para registrar estudiantes -->
+    <div id="modal-estudiante" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-estudiante">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 20px;">Registrar Estudiante</h2>
+            
+            <form id="form-registro-estudiante">
+                <div class="form-group">
+                    <label for="est-cedula">Cédula:</label>
+                    <input type="text" id="est-cedula" required placeholder="Número de cédula">
+                </div>
+                <div class="form-group">
+                    <label for="est-nombres">Nombres:</label>
+                    <input type="text" id="est-nombres" required placeholder="Nombres completos">
+                </div>
+                <div class="form-group">
+                    <label for="est-apellidos">Apellidos:</label>
+                    <input type="text" id="est-apellidos" required placeholder="Apellidos completos">
+                </div>
+                <div class="form-group">
+                    <label for="est-carrera">Carrera:</label>
+                    <select id="est-carrera" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="">Cargando carreras...</option>
+                        <!-- Se llena desde la base de datos -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="est-password">Contraseña temporal:</label>
+                    <input type="text" id="est-password" required value="UNIBE2024" placeholder="Contraseña de acceso">
+                </div>
+                <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 15px;">Guardar Estudiante</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ventana emergente (Modal) para Asignar Estudiante a Empresa -->
+    <div id="modal-asignar" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-asignar">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 20px;">Asignar Estudiante a Empresa</h2>
+            
+            <form id="form-asignacion">
+                <div class="form-group">
+                    <label for="select-estudiante-asig">Seleccionar Estudiante:</label>
+                    <select id="select-estudiante-asig" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="">Cargando estudiantes...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="select-empresa-asig">Seleccionar Empresa (Convenios Aprobados):</label>
+                    <select id="select-empresa-asig" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="">Cargando empresas aprobadas...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-tiempo-pasantia">Tiempo de Pasantía / Duración:</label>
+                    <input type="text" id="input-tiempo-pasantia" required placeholder="Ej. 3 meses, 160 horas" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                </div>
+
+                <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 15px;">Guardar Asignación</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Tutor -->
+    <div id="modal-tutor" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-btn" id="close-tutor">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 20px;">Registrar Tutor</h2>
+            <form id="form-registro-tutor">
+                <div class="form-group"><label>Cédula:</label><input type="text" id="tut-cedula" required></div>
+                <div class="form-group"><label>Nombres:</label><input type="text" id="tut-nombres" required></div>
+                <div class="form-group"><label>Apellidos:</label><input type="text" id="tut-apellidos" required></div>
+                <div class="form-group"><label>Correo:</label><input type="email" id="tut-correo" required></div>
+                <div class="form-group"><label>Contraseña temporal:</label><input type="text" id="tut-password" required value="TUTOR2024"></div>
+                <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 10px;">Guardar Tutor</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Vincular Tutor a Empresa -->
+    <div id="modal-vincular-tutor" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-btn" id="close-vincular-tutor">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 20px;">Vincular Empresa</h2>
+            <form id="form-vincular-tutor">
+                <input type="hidden" id="vincular-tutor-id">
+                <div class="form-group">
+                    <label>Seleccione Empresa (Convenio Aprobado):</label>
+                    <select id="select-vincular-empresa" required style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;"></select>
+                </div>
+                <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 10px;">Vincular</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/dashboard-admin.js"></script>
+</body>
+</html>
