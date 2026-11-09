@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     document.getElementById('nombre-admin').textContent = `${usuario.nombres} (Admin)`;
+    const esc = (texto) => String(texto ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
         localStorage.removeItem('usuarioLogueado');
@@ -39,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 3. FUNCIÓN PARA RENDERIZAR Y CARGAR ESTUDIANTES ---
     const renderTablaEstudiantes = (estudiantesAMostrar) => {
         if (!tbodyEstudiantes) return;
-
         tbodyEstudiantes.innerHTML = '';
 
         if (estudiantesAMostrar.length === 0) {
@@ -58,25 +58,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (est.empresa_nombre) {
                 empresaAsignada = `
-                    <span style="font-weight: bold;">${est.empresa_nombre}</span><br>
-                    <button onclick="desvincularEstudiante(${est.id})" style="background-color: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; margin-top: 5px;" title="Remover asignación">✖ Desvincular</button>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
+                        <span style="font-weight: bold; text-align: center;">${esc(est.empresa_nombre)}</span>
+                        <button onclick="desvincularEstudiante(${est.id})" style="background-color: #dc3545; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 12px; cursor: pointer; width: 100%; font-weight: bold;" title="Remover asignación">✖ Desvincular</button>
+                    </div>
                 `;
-                tiempoPasantia = est.tiempo_pasantia;
+                tiempoPasantia = esc(est.tiempo_pasantia);
             }
 
             const fila = `
                 <tr>
-                    <td style="text-align: center;">
+                    <td style="text-align: center; vertical-align: middle;">
                         <input type="checkbox" class="chk-estudiante" value="${est.id}" style="transform: scale(1.5); cursor: pointer;">
                     </td>
-                    <td style="font-weight: bold;">${est.cedula}</td>
-                    <td>${est.nombres} ${est.apellidos}</td>
-                    <td>${est.carrera_nombre || 'Sin carrera'}</td>
-                    <td>${est.correo || 'No registrado'}</td>
-                    <td style="font-weight: bold; color: #003366;">${horasHechas} / ${metaHoras} hrs</td>
-                    <td>${empresaAsignada}</td>
-                    <td>${tiempoPasantia}</td>
-                    <td style="font-weight: bold; color: ${horasFaltantes > 0 ? '#dc3545' : '#28a745'};">${horasFaltantes} hrs</td>
+                    <td style="font-weight: bold; vertical-align: middle;">${esc(est.cedula)}</td>
+                    <td style="vertical-align: middle;">${esc(est.nombres)} ${esc(est.apellidos)}</td>
+                    <td style="vertical-align: middle;">${esc(est.carrera_nombre || 'Sin carrera')}</td>
+                    <td style="vertical-align: middle;">${esc(est.correo || 'No registrado')}</td>
+                    <td style="font-weight: bold; color: #003366; vertical-align: middle; text-align: center;">${horasHechas} / ${metaHoras} hrs</td>
+                    <td style="vertical-align: middle;">${empresaAsignada}</td>
+                    <td style="vertical-align: middle; text-align: center;">${tiempoPasantia}</td>
+                    <td style="font-weight: bold; color: ${horasFaltantes > 0 ? '#dc3545' : '#28a745'}; vertical-align: middle; text-align: center;">${horasFaltantes} hrs</td>
                 </tr>
             `;
             tbodyEstudiantes.innerHTML += fila;
@@ -90,11 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cargarEstudiantes = async () => {
         if (!tbodyEstudiantes) return;
         tbodyEstudiantes.innerHTML = '<tr><td colspan="9" style="text-align: center;">Actualizando estudiantes... ⏳</td></tr>';
-
         try {
             const response = await fetch('http://localhost:3000/api/admin/estudiantes');
             const data = await response.json();
-
             if (data.exito) {
                 window.listaEstudiantes = data.estudiantes;
                 renderTablaEstudiantes(window.listaEstudiantes);
@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Buscador en tiempo real para estudiantes
     if (inputBuscarEstudiante) {
         inputBuscarEstudiante.addEventListener('input', (e) => {
             const texto = e.target.value.toLowerCase().trim();
@@ -113,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cedula = (est.cedula || '').toLowerCase();
                 const nombreCompleto = `${est.nombres} ${est.apellidos}`.toLowerCase();
                 const carrera = (est.carrera_nombre || '').toLowerCase();
-
                 return cedula.includes(texto) || nombreCompleto.includes(texto) || carrera.includes(texto);
             });
             renderTablaEstudiantes(filtrados);
@@ -124,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnActualizarEstudiantes.addEventListener('click', cargarEstudiantes);
     }
 
-    // Botón eliminar seleccionados para estudiantes
     if (btnEliminarEstudiantes) {
         btnEliminarEstudiantes.addEventListener('click', async () => {
             const casillas = document.querySelectorAll('.chk-estudiante:checked');
@@ -181,45 +178,47 @@ document.addEventListener('DOMContentLoaded', () => {
             let botonesAccion = '';
             if (estadoActual.toLowerCase() === 'pendiente') {
                 botonesAccion = `
-                    <div style="display: flex; gap: 15px; justify-content: center;">
-                        <button onclick="cambiarEstado(${sol.id}, 'Aprobada')" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; flex: 1; margin: 0;">Aprobar</button>
-                        <button onclick="cambiarEstado(${sol.id}, 'Rechazada')" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; flex: 1; margin: 0;">Rechazar</button>
+                    <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                        <button onclick="cambiarEstado(${sol.id}, 'Aprobada')" style="background-color: #28a745; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%;">Aprobar</button>
+                        <button onclick="cambiarEstado(${sol.id}, 'Rechazada')" style="background-color: #dc3545; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%;">Rechazar</button>
                     </div>
                 `;
             } else if (estadoActual.toLowerCase() === 'aprobada') {
                 botonesAccion = `
-                    <button onclick="cambiarEstado(${sol.id}, 'Finalizado')" style="background-color: #6c757d; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; margin: 0;">Finalizar Vínculo</button>
+                    <button onclick="cambiarEstado(${sol.id}, 'Finalizado')" style="background-color: #6c757d; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%;">Finalizar Vínculo</button>
                 `;
             } else if (estadoActual.toLowerCase() === 'rechazada') {
                 botonesAccion = `
-                    <button onclick="cambiarEstado(${sol.id}, 'Pendiente')" style="background-color: #ffc107; color: black; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; margin: 0;">Reabrir Solicitud</button>
+                    <button onclick="cambiarEstado(${sol.id}, 'Pendiente')" style="background-color: #ffc107; color: black; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%;">Reabrir Solicitud</button>
                 `;
             } else if (estadoActual.toLowerCase() === 'finalizado') {
                 botonesAccion = `
-                    <button onclick="cambiarEstado(${sol.id}, 'Pendiente')" style="background-color: #17a2b8; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; margin: 0;">Reabrir Convenio</button>
+                    <button onclick="cambiarEstado(${sol.id}, 'Pendiente')" style="background-color: #17a2b8; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight: bold; width: 100%;">Reabrir Convenio</button>
                 `;
             } else {
                 botonesAccion = `<span style="color: #6c757d; font-weight: bold; font-style: italic;">Sin acciones</span>`;
             }
 
             const linkPdf = sol.ruta_documento 
-                ? `<a href="http://localhost:3000/uploads/${sol.ruta_documento}" target="_blank" style="color: #003366; font-weight: bold; text-decoration: underline;">Ver PDF</a>` 
+                ? `<a href="http://localhost:3000/uploads/${encodeURIComponent(sol.ruta_documento)}" target="_blank" style="color: #003366; font-weight: bold; text-decoration: underline;">Ver PDF</a>` 
                 : 'Sin archivo';
 
             const fila = `
                 <tr>
-                    <td style="text-align: center;">
+                    <td style="text-align: center; vertical-align: middle;">
                         <input type="checkbox" class="chk-solicitud" value="${sol.id}" style="transform: scale(1.5); cursor: pointer;">
                     </td>
-                    <td style="font-weight: bold;">${sol.codigo_seguimiento || 'N/A'}</td>
-                    <td>${sol.nombre_empresa}<br><small style="color: #666;">RUC: ${sol.ruc}</small></td>
-                    <td>
-                        ${sol.contacto_nombre}<br>
-                        <button onclick="verInfoContacto(${sol.id})" style="background-color: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; margin-top: 5px;">+ Ver Info</button>
+                    <td style="font-weight: bold; vertical-align: middle;">${esc(sol.codigo_seguimiento || 'N/A')}</td>
+                    <td style="vertical-align: middle;">${esc(sol.nombre_empresa)}<br><small style="color: #666;">RUC: ${esc(sol.ruc)}</small></td>
+                    <td style="vertical-align: middle;">
+                        <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                            <span>${esc(sol.contacto_nombre)}</span>
+                            <button onclick="verInfoContacto(${sol.id})" style="background-color: #007bff; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold; width: 100%;">+ Ver Info</button>
+                        </div>
                     </td>
-                    <td>${linkPdf}</td>
-                    <td style="font-weight: bold; text-transform: capitalize;">${estadoActual}</td>
-                    <td>${botonesAccion}</td>
+                    <td style="vertical-align: middle; text-align: center;">${linkPdf}</td>
+                    <td style="font-weight: bold; text-transform: capitalize; vertical-align: middle; text-align: center;">${esc(estadoActual)}</td>
+                    <td style="vertical-align: middle;">${botonesAccion}</td>
                 </tr>
             `;
             tbodySolicitudes.innerHTML += fila;
@@ -252,19 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputBuscar) {
         inputBuscar.addEventListener('input', (e) => {
             const textoBusqueda = e.target.value.toLowerCase().trim();
-            
             const filtradas = window.listaSolicitudes.filter(sol => {
                 const nombre = (sol.nombre_empresa || '').toLowerCase();
                 const ruc = (sol.ruc || '').toLowerCase();
                 const codigo = (sol.codigo_seguimiento || '').toLowerCase();
                 const contacto = (sol.contacto_nombre || '').toLowerCase();
-
-                return nombre.includes(textoBusqueda) || 
-                       ruc.includes(textoBusqueda) || 
-                       codigo.includes(textoBusqueda) || 
-                       contacto.includes(textoBusqueda);
+                return nombre.includes(textoBusqueda) || ruc.includes(textoBusqueda) || codigo.includes(textoBusqueda) || contacto.includes(textoBusqueda);
             });
-
             renderTabla(filtradas);
         });
     }
@@ -292,9 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ids: idsAEliminar })
                     });
-
                     const data = await response.json();
-
                     if (data.exito) {
                         cargarDatos(); 
                     } else {
@@ -318,9 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ estado: nuevoEstado })
             });
-
             const data = await response.json();
-
             if (data.exito) {
                 cargarDatos(); 
             } else {
@@ -376,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.exito) {
                 selectCarreras.innerHTML = '<option value="">Seleccione una carrera...</option>';
                 data.carreras.forEach(carrera => {
-                    selectCarreras.innerHTML += `<option value="${carrera.id}">${carrera.nombre}</option>`;
+                    selectCarreras.innerHTML += `<option value="${carrera.id}">${esc(carrera.nombre)}</option>`;
                 });
             }
         } catch (error) {
@@ -436,50 +425,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 9. LÓGICA DE PESTAÑAS (TABS) 3 SECCIONES ---
-    const btnTabConvenios = document.getElementById('btn-tab-convenios');
-    const btnTabEstudiantes = document.getElementById('btn-tab-estudiantes');
-    const btnTabTutores = document.getElementById('btn-tab-tutores');
-    
-    const seccionConvenios = document.getElementById('seccion-convenios');
-    const seccionEstudiantes = document.getElementById('seccion-estudiantes');
-    const seccionTutores = document.getElementById('seccion-tutores');
+    // --- 9. LÓGICA DE PESTAÑAS (TABS) ---
+    const pestanas = [
+        { boton: document.getElementById('btn-tab-convenios'),       seccion: document.getElementById('seccion-convenios'),       alAbrir: null },
+        { boton: document.getElementById('btn-tab-estudiantes'),     seccion: document.getElementById('seccion-estudiantes'),     alAbrir: () => cargarEstudiantes() },
+        { boton: document.getElementById('btn-tab-tutores'),         seccion: document.getElementById('seccion-tutores'),         alAbrir: () => cargarTutores() },
+        { boton: document.getElementById('btn-tab-notificaciones'),  seccion: document.getElementById('seccion-notificaciones'),  alAbrir: () => cargarNotificaciones() }
+    ];
 
-    const resetTabs = () => {
-        [btnTabConvenios, btnTabEstudiantes, btnTabTutores].forEach(btn => {
-            if(btn) { btn.style.backgroundColor = '#e9ecef'; btn.style.color = '#333'; }
+    const abrirPestana = (activa) => {
+        pestanas.forEach(p => {
+            if (!p.boton || !p.seccion) return;
+            const esActiva = p === activa;
+            p.seccion.style.display = esActiva ? 'block' : 'none';
+            p.boton.style.backgroundColor = esActiva ? '#003366' : '#e9ecef';
+            p.boton.style.color = esActiva ? 'white' : '#333';
         });
-        [seccionConvenios, seccionEstudiantes, seccionTutores].forEach(sec => {
-            if(sec) sec.style.display = 'none';
-        });
+        if (activa.alAbrir) activa.alAbrir();
     };
 
-    if (btnTabConvenios && btnTabEstudiantes && btnTabTutores) {
-        btnTabConvenios.addEventListener('click', () => {
-            resetTabs();
-            seccionConvenios.style.display = 'block';
-            btnTabConvenios.style.backgroundColor = '#003366'; btnTabConvenios.style.color = 'white';
-        });
-        btnTabEstudiantes.addEventListener('click', () => {
-            resetTabs();
-            seccionEstudiantes.style.display = 'block';
-            btnTabEstudiantes.style.backgroundColor = '#003366'; btnTabEstudiantes.style.color = 'white';
-            cargarEstudiantes(); 
-        });
-        btnTabTutores.addEventListener('click', () => {
-            resetTabs();
-            seccionTutores.style.display = 'block';
-            btnTabTutores.style.backgroundColor = '#003366'; btnTabTutores.style.color = 'white';
-            cargarTutores(); // Llama a la nueva función de tutores
-        });
-    }
+    pestanas.forEach(p => {
+        if (p.boton) p.boton.addEventListener('click', () => abrirPestana(p));
+    });
 
     // --- 10. GESTOR DE TUTORES (CRUD Y VINCULACIÓN) ---
     const tbodyTutores = document.getElementById('tbody-tutores');
     const inputBuscarTutor = document.getElementById('input-buscar-tutor');
     window.listaTutores = [];
 
-    // Renderizar tabla
     const renderTablaTutores = (tutoresAMostrar) => {
         if (!tbodyTutores) return;
         tbodyTutores.innerHTML = '';
@@ -490,43 +463,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tutoresAMostrar.forEach(tut => {
-            // Botón Activar/Desactivar
             const esActivo = tut.estado_cuenta === 'Activo';
             const colorEstado = esActivo ? '#28a745' : '#dc3545';
-            const btnEstado = `<button onclick="cambiarEstadoTutor(${tut.id}, '${esActivo ? 'Inactivo' : 'Activo'}')" style="background-color: ${esActivo ? '#ffc107' : '#28a745'}; color: ${esActivo ? 'black' : 'white'}; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; width: 100%;">${esActivo ? 'Desactivar Cuenta' : 'Activar Cuenta'}</button>`;
+            const btnEstado = `<button onclick="cambiarEstadoTutor(${tut.id}, '${esActivo ? 'Inactivo' : 'Activo'}')" style="background-color: ${esActivo ? '#ffc107' : '#28a745'}; color: ${esActivo ? 'black' : 'white'}; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">${esActivo ? 'Desactivar Cuenta' : 'Activar Cuenta'}</button>`;
 
-            // Lógica Empresa Vinculada
             let bloqueEmpresa = '';
             if (tut.empresa_nombre) {
                 bloqueEmpresa = `
-                    <span style="font-weight: bold; color: #003366;">${tut.empresa_nombre}</span><br>
-                    <button onclick="desvincularTutor(${tut.id})" style="background-color: #dc3545; color: white; border: none; padding: 3px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; margin-top: 5px;">✖ Desvincular</button>
+                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center; width: 100%;">
+                        <span style="font-weight: bold; color: #003366; text-align: center;">${esc(tut.empresa_nombre)}</span>
+                        <button onclick="desvincularTutor(${tut.id})" style="background-color: #dc3545; color: white; border: none; padding: 6px; font-size: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%;">✖ Desvincular</button>
+                    </div>
                 `;
             } else {
                 bloqueEmpresa = `
-                    <span style="color: #666; font-style: italic;">Sin asignar</span><br>
-                    <button onclick="abrirModalVincularTutor(${tut.id})" style="background-color: #17a2b8; color: white; border: none; padding: 3px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; margin-top: 5px;">🔗 Vincular Empresa</button>
+                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center; width: 100%;">
+                        <span style="color: #666; font-style: italic; text-align: center;">Sin asignar</span>
+                        <button onclick="abrirModalVincularTutor(${tut.id})" style="background-color: #17a2b8; color: white; border: none; padding: 6px; font-size: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%;">🔗 Vincular Empresa</button>
+                    </div>
                 `;
             }
 
             const fila = `
                 <tr>
-                    <td style="text-align: center;"><input type="checkbox" class="chk-tutor" value="${tut.id}" style="transform: scale(1.5);"></td>
-                    <td style="font-weight: bold;">${tut.cedula}</td>
-                    <td>${tut.nombres} ${tut.apellidos}</td>
-                    <td>${tut.correo}</td>
-                    <td style="font-weight: bold; color: ${colorEstado};">${tut.estado_cuenta}</td>
-                    <td>${bloqueEmpresa}</td>
-                    <td>${btnEstado}</td>
+                    <td style="text-align: center; vertical-align: middle;"><input type="checkbox" class="chk-tutor" value="${tut.id}" style="transform: scale(1.5);"></td>
+                    <td style="font-weight: bold; vertical-align: middle;">${esc(tut.cedula)}</td>
+                    <td style="vertical-align: middle;">${esc(tut.nombres)} ${esc(tut.apellidos)}</td>
+                    <td style="vertical-align: middle;">${esc(tut.correo)}</td>
+                    <td style="font-weight: bold; color: ${colorEstado}; vertical-align: middle; text-align: center;">${tut.estado_cuenta}</td>
+                    <td style="vertical-align: middle;">${bloqueEmpresa}</td>
+                    <td style="vertical-align: middle;">${btnEstado}</td>
                 </tr>
             `;
             tbodyTutores.innerHTML += fila;
         });
     };
 
-    // Cargar Tutores
     const contadorTutores = document.getElementById('contador-tutores');
+    
     const cargarTutores = async () => {
+        if (!tbodyTutores) return;
         tbodyTutores.innerHTML = '<tr><td colspan="7" style="text-align: center;">Cargando...</td></tr>';
         try {
             const res = await fetch('http://localhost:3000/api/admin/tutores');
@@ -534,14 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.exito) {
                 window.listaTutores = data.tutores;
                 renderTablaTutores(window.listaTutores);
-                if (contadorTutores) contadorTutores.textContent = data.tutores.length; // Actualiza la tarjeta 3
+                if (contadorTutores) contadorTutores.textContent = data.tutores.length;
             }
         } catch (error) {
             tbodyTutores.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error al cargar.</td></tr>';
         }
     };
 
-    // Búsqueda Tutores
     if (inputBuscarTutor) {
         inputBuscarTutor.addEventListener('input', (e) => {
             const texto = e.target.value.toLowerCase().trim();
@@ -554,7 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById('btn-actualizar-tutores')?.addEventListener('click', cargarTutores);
 
-    // Acciones Globales: Estado, Desvincular y Eliminar
     window.cambiarEstadoTutor = async (id, nuevoEstado) => {
         if(!confirm(`¿Cambiar cuenta a ${nuevoEstado}?`)) return;
         await fetch(`http://localhost:3000/api/admin/tutores/${id}/estado`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({estado_cuenta: nuevoEstado}) });
@@ -576,7 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Modales de Tutor
     const modalTutor = document.getElementById('modal-tutor');
     const modalVincular = document.getElementById('modal-vincular-tutor');
 
@@ -584,7 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('close-tutor')?.addEventListener('click', () => modalTutor.style.display = 'none');
     document.getElementById('close-vincular-tutor')?.addEventListener('click', () => modalVincular.style.display = 'none');
 
-    // Submit Crear Tutor
     document.getElementById('form-registro-tutor')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
@@ -600,7 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.exito) { document.getElementById('form-registro-tutor').reset(); modalTutor.style.display = 'none'; cargarTutores(); }
     });
 
-    // Abrir Modal Vincular
     window.abrirModalVincularTutor = async (id) => {
         document.getElementById('vincular-tutor-id').value = id;
         const select = document.getElementById('select-vincular-empresa');
@@ -611,11 +582,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         if (data.exito) {
             select.innerHTML = '<option value="">Seleccione empresa...</option>';
-            data.empresas.forEach(emp => select.innerHTML += `<option value="${emp.id}">${emp.nombre_empresa}</option>`);
+            data.empresas.forEach(emp => select.innerHTML += `<option value="${emp.id}">${esc(emp.nombre_empresa)}</option>`);
         }
     };
 
-    // Submit Vincular Tutor
     document.getElementById('form-vincular-tutor')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('vincular-tutor-id').value;
@@ -625,7 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarTutores();
     });
 
-    // Cerrar modales al hacer clic fuera
     window.addEventListener('click', (e) => {
         if (e.target === modalTutor) modalTutor.style.display = 'none';
         if (e.target === modalVincular) modalVincular.style.display = 'none';
@@ -633,44 +602,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 11. GESTIÓN DEL MOTOR DE ASIGNACIONES ---
     const modalAsignar = document.getElementById('modal-asignar');
-    const btnRealAsignar = document.getElementById('btn-abrir-asignar'); // Ahora busca el botón por su ID exacto
+    const btnRealAsignar = document.getElementById('btn-abrir-asignar');
     const btnCerrarAsignar = document.getElementById('close-asignar');
     const formAsignacion = document.getElementById('form-asignacion');
     const selectEstudianteAsig = document.getElementById('select-estudiante-asig');
     const selectEmpresaAsig = document.getElementById('select-empresa-asig');
 
-    // Buscamos específicamente el botón de la Tarjeta 3 por su texto o clase si es necesario
-    const botonesTarjeta = document.querySelectorAll('.card button');
-    
-    botonesTarjeta.forEach(b => {
-        if (b.textContent.includes('Asignar Estudiante')) {
-            btnRealAsignar = b;
-        }
-    });
-
     const cargarDatosAsignacion = async () => {
-        // Cargar estudiantes para el select
         try {
             const respEst = await fetch('http://localhost:3000/api/admin/estudiantes');
             const dataEst = await respEst.json();
             if (dataEst.exito) {
                 selectEstudianteAsig.innerHTML = '<option value="">Seleccione un estudiante...</option>';
                 dataEst.estudiantes.forEach(est => {
-                    selectEstudianteAsig.innerHTML += `<option value="${est.id}">${est.nombres} ${est.apellidos} (Cédula: ${est.cedula})</option>`;
+                    selectEstudianteAsig.innerHTML += `<option value="${est.id}">${esc(est.nombres)} ${esc(est.apellidos)} (Cédula: ${esc(est.cedula)})</option>`;
                 });
             }
         } catch (e) {
             console.error('Error cargando estudiantes para asignar:', e);
         }
 
-        // Cargar empresas aprobadas para el select
         try {
             const respEmp = await fetch('http://localhost:3000/api/admin/empresas-aprobadas');
             const dataEmp = await respEmp.json();
             if (dataEmp.exito) {
                 selectEmpresaAsig.innerHTML = '<option value="">Seleccione una empresa aprobada...</option>';
                 dataEmp.empresas.forEach(emp => {
-                    selectEmpresaAsig.innerHTML += `<option value="${emp.id}">${emp.nombre_empresa} (RUC: ${emp.ruc})</option>`;
+                    selectEmpresaAsig.innerHTML += `<option value="${emp.id}">${esc(emp.nombre_empresa)} (RUC: ${esc(emp.ruc)})</option>`;
                 });
             }
         } catch (e) {
@@ -683,11 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cargarDatosAsignacion();
             modalAsignar.style.display = 'flex';
         });
-
         btnCerrarAsignar.addEventListener('click', () => {
             modalAsignar.style.display = 'none';
         });
-
         window.addEventListener('click', (e) => {
             if (e.target === modalAsignar) {
                 modalAsignar.style.display = 'none';
@@ -698,7 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formAsignacion) {
         formAsignacion.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const estudiante_id = selectEstudianteAsig.value;
             const empresa_id = selectEmpresaAsig.value;
             const tiempo_pasantia = document.getElementById('input-tiempo-pasantia').value;
@@ -716,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('✅ ' + data.mensaje);
                     formAsignacion.reset();
                     modalAsignar.style.display = 'none';
-                    cargarEstudiantes(); // Recarga la tabla para ver reflejada la asignación
+                    cargarEstudiantes(); 
                 } else {
                     alert('❌ Error: ' + data.mensaje);
                 }
@@ -727,19 +682,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- FUNCIÓN PARA DESVINCULAR ESTUDIANTE ---
     window.desvincularEstudiante = async (estudiante_id) => {
         if (!confirm('¿Estás seguro de que deseas desvincular a este estudiante de su empresa actual?')) return;
-
         try {
             const response = await fetch(`http://localhost:3000/api/admin/asignaciones/${estudiante_id}`, {
                 method: 'DELETE'
             });
-
             const data = await response.json();
-
             if (data.exito) {
-                cargarEstudiantes(); // Recargamos la tabla automáticamente
+                cargarEstudiantes();
             } else {
                 alert('❌ Error: ' + data.mensaje);
             }
@@ -749,7 +700,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // --- 10. CARGA INICIAL ---
+    // ==========================================
+    // NOTIFICACIONES: SOLICITUDES DE INCORPORACIÓN
+    // ==========================================
+    const tbodyNotificaciones = document.getElementById('tbody-notificaciones');
+    const badgeNotifAdmin = document.getElementById('badge-notificaciones-admin');
+
+    const cargarNotificaciones = async () => {
+        if (!tbodyNotificaciones) return;
+
+        try {
+            const res = await fetch('http://localhost:3000/api/admin/solicitudes-incorporacion');
+            const data = await res.json();
+            const solicitudes = data.solicitudes || [];
+
+            if (badgeNotifAdmin) {
+                badgeNotifAdmin.textContent = solicitudes.length;
+                badgeNotifAdmin.style.display = solicitudes.length > 0 ? 'inline-block' : 'none';
+            }
+
+            tbodyNotificaciones.innerHTML = '';
+
+            if (solicitudes.length === 0) {
+                tbodyNotificaciones.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">No hay solicitudes de incorporación pendientes.</td></tr>';
+                return;
+            }
+
+            solicitudes.forEach(s => {
+                const fecha = new Date(s.fecha_solicitud).toLocaleDateString('es-ES');
+                const mensaje = `El tutor <strong>${esc(s.tutor_nombres)} ${esc(s.tutor_apellidos)}</strong> solicita incorporar al estudiante a la empresa <strong>${esc(s.nombre_empresa)}</strong> para el puesto de <em>${esc(s.oferta_titulo)}</em>.`;
+
+                const btnAprobar = `<button onclick="procesarIncorporacion(${s.solicitud_id}, ${s.estudiante_id}, ${s.empresa_id}, 'Aprobar')" style="background: #28a745; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">✔ Aprobar vinculación</button>`;
+                const btnRechazar = `<button onclick="procesarIncorporacion(${s.solicitud_id}, ${s.estudiante_id}, ${s.empresa_id}, 'Rechazar')" style="background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">✖ Rechazar</button>`;
+
+                tbodyNotificaciones.innerHTML += `
+                    <tr>
+                        <td style="vertical-align: middle;">${fecha}</td>
+                        <td style="vertical-align: middle;"><strong>${esc(s.nombres)} ${esc(s.apellidos)}</strong><br><span style="color: #666; font-size: 13px;">C.C: ${esc(s.cedula)}</span></td>
+                        <td style="vertical-align: middle;">${mensaje}</td>
+                        <td style="text-align: center; vertical-align: middle; width: 180px;">
+                            <div style="display: flex; flex-direction: column; gap: 5px; align-items: center; width: 100%;">
+                                ${btnAprobar}
+                                ${btnRechazar}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error('Error al cargar notificaciones:', error);
+            tbodyNotificaciones.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Error al conectar con el servidor.</td></tr>';
+        }
+    };
+
+    window.procesarIncorporacion = async (solicitud_id, estudiante_id, empresa_id, accion) => {
+        let tiempo_pasantia = 'No definido';
+
+        if (accion === 'Aprobar') {
+            if (!confirm('¿Aprobar la vinculación? Si el estudiante tenía otra empresa, quedará desvinculado de ella.')) return;
+            tiempo_pasantia = prompt('Tiempo estimado de la pasantía (ej. 3 meses, 240 horas):', '3 meses');
+            if (tiempo_pasantia === null) return; 
+        } else {
+            if (!confirm('¿Rechazar esta solicitud del tutor?')) return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/api/admin/procesar-incorporacion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ solicitud_id, estudiante_id, empresa_id, accion, tiempo_pasantia })
+            });
+            const data = await res.json();
+            if (data.exito) {
+                alert('✅ ' + data.mensaje);
+                cargarNotificaciones(); 
+                cargarEstudiantes();    
+            } else {
+                alert('❌ Error: ' + data.mensaje);
+                cargarNotificaciones();
+            }
+        } catch (error) {
+            console.error('Error al procesar:', error);
+            alert('❌ Error de conexión al procesar la solicitud.');
+        }
+    };
+
+    document.getElementById('btn-actualizar-notificaciones')?.addEventListener('click', cargarNotificaciones);
+
+    // --- 12. CARGA INICIAL ---
     cargarDatos();
-    cargarEstudiantes(); 
+    cargarEstudiantes();
+    cargarTutores(); // <--- SOLUCIÓN: ESTO ACTUALIZARÁ EL CONTADOR DE TUTORES AL INICIAR
+    cargarNotificaciones();
+    setInterval(cargarNotificaciones, 60000); 
 });

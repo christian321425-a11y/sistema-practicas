@@ -1,46 +1,56 @@
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault(); // Evita que la página se recargue en blanco
+document.addEventListener('DOMContentLoaded', () => {
+    const formLogin = document.getElementById('form-login'); // Asegúrate de que tu formulario en login.html tenga id="form-login"
+    let mensajeDiv = document.getElementById('mensaje-error'); 
+    
+    // Si no existe el div de error en el HTML, lo creamos dinámicamente
+    if (!mensajeDiv) {
+        mensajeDiv = document.createElement('div');
+        mensajeDiv.id = 'mensaje-error';
+        mensajeDiv.style.color = 'red';
+        mensajeDiv.style.marginTop = '15px';
+        mensajeDiv.style.textAlign = 'center';
+        formLogin.appendChild(mensajeDiv);
+    }
 
-    // Capturamos lo que el usuario escribió
-    const cedula = document.getElementById('cedula').value;
-    const password = document.getElementById('password').value;
-    const rol = document.getElementById('rol').value;
-    const mensajeError = document.getElementById('mensaje-error');
+    formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Asume que los inputs tienen estos IDs en tu login.html
+        const cedula = document.getElementById('login-cedula').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        const rol = document.getElementById('login-rol').value;
 
-    // Limpiamos errores anteriores
-    mensajeError.textContent = '';
+        mensajeDiv.textContent = 'Iniciando sesión...';
+        mensajeDiv.style.color = '#003366';
 
-    try {
-        // Enviamos los datos al servidor (Backend)
-        const response = await fetch('http://localhost:3000/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cedula, password, rol })
-        });
+        try {
+            const res = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cedula, password, rol })
+            });
 
-        const data = await response.json();
+            const data = await res.json();
 
-     if (data.exito) {
-                // Guardamos los datos del usuario en el navegador (Local Storage)
+            if (data.exito) {
+                // Guardar la sesión y redirigir según el rol
                 localStorage.setItem('usuarioLogueado', JSON.stringify(data.usuario));
                 
-                // REDIRECCIÓN INTELIGENTE SEGÚN EL ROL
                 if (data.usuario.rol === 'admin') {
                     window.location.href = 'dashboard-admin.html';
                 } else if (data.usuario.rol === 'estudiante') {
                     window.location.href = 'dashboard-estudiante.html';
-                } else {
-                    // Por si luego agregamos el rol tutor
-                    alert('Rol no reconocido por el sistema.');
+                } else if (data.usuario.rol === 'tutor') {
+                    window.location.href = 'dashboard-tutor.html'; // Aquí redirige al tutor
                 }
-                
             } else {
-                // Si la cédula o contraseña son incorrectas, mostramos el error
-                mensajeDiv.textContent = data.mensaje;
                 mensajeDiv.style.color = 'red';
+                mensajeDiv.textContent = data.mensaje;
             }
-    } catch (error) {
-        mensajeError.textContent = 'Error al conectar con el servidor. ¿Está encendido XAMPP y Node?';
-        console.error(error);
-    }
+        } catch (error) {
+            console.error(error);
+            mensajeDiv.style.color = 'red';
+            mensajeDiv.textContent = 'Error al conectar con el servidor. ¿Está encendido XAMPP y Node?';
+        }
+    });
 });

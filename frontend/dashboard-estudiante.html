@@ -5,93 +5,277 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Estudiante - Prácticas UNIB.E</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body.dashboard-body { margin: 0 !important; padding: 0 !important; max-width: 100% !important; width: 100vw !important; height: 100vh !important; display: flex; flex-direction: column; overflow: hidden; background-color: #f4f7f6; }
+        .navbar { width: 100%; max-width: 100% !important; border-radius: 0 !important; margin: 0 !important; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background-color: #003366; color: white; }
+        .navbar h2 { margin: 0; font-size: 22px; }
+        .user-menu { display: flex; align-items: center; gap: 25px; }
+        .btn-logout { background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .layout-estudiante { display: flex; flex: 1; width: 100%; overflow: hidden; }
+        .sidebar { width: 260px; min-width: 260px; background-color: #ffffff; border-right: 3px solid #003366; display: flex; flex-direction: column; height: 100%; margin: 0 !important; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li { padding: 20px; font-size: 16px; color: #333; border-bottom: 2px solid #003366; cursor: pointer; transition: background 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-menu li:hover { background-color: #f0f4f8; }
+        .sidebar-menu li.activo { background-color: #003366; color: white; font-weight: bold; }
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; background-color: #f4f7f6; }
+        .seccion-estudiante { display: none; }
+        .seccion-estudiante.activa { display: block; }
+
+        /* Notificaciones */
+        .menu-badge { background: #dc3545; color: white; border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; display: none; }
+        .notif-item { padding: 12px 14px; border-bottom: 1px solid #eee; border-left: 4px solid #ccc; background: #fff; cursor: pointer; list-style: none; }
+        .notif-item.no-leida { background: #e9f5ff; }
+        .notif-item p { margin: 0 0 5px 0; font-size: 14px; color: #333; line-height: 1.4; }
+        .notif-item.no-leida p { font-weight: bold; }
+        .notif-item small { color: #888; font-size: 12px; }
+        .notif-vacia { padding: 20px; text-align: center; color: #666; list-style: none; }
+
+        /* Resumen de horas del estudiante */
+		.resumen-horas { display: flex; gap: 12px; flex-wrap: wrap; margin: 15px 0; }
+		.resumen-item { flex: 1; min-width: 120px; background: #fff; border-radius: 6px; padding: 12px; text-align: center; border-top: 4px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+		.resumen-item strong { display: block; font-size: 24px; margin-bottom: 2px; }
+		.resumen-item span { font-size: 13px; color: #555; }
+		.barra { background: #e9ecef; border-radius: 6px; height: 12px; overflow: hidden; }
+		.barra > div { background: #28a745; height: 100%; width: 0; transition: width 0.4s; }
+
+    </style>
 </head>
 <body class="dashboard-body">
-    
+
+    <!-- Barra de Navegación Superior -->
     <nav class="navbar">
-        <h2>Sistema de Prácticas</h2>
-        <div class="user-menu">
+        <h2>Sistema de Prácticas - UNIB.E</h2>
+
+        <div class="user-menu" style="display: flex; align-items: center; gap: 15px;">
+            <div style="position: relative; cursor: pointer;" id="btn-notificaciones" title="Notificaciones">
+                <span style="font-size: 24px;">🔔</span>
+                <span id="badge-notificaciones" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; display: none;">0</span>
+
+                <div id="panel-notificaciones-dropdown" style="display: none; position: absolute; right: 0; top: 35px; background: white; color: #333; border: 1px solid #ccc; border-radius: 5px; width: 320px; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 9999; cursor: default;">
+                    <h4 style="margin: 0; padding: 10px; background: #003366; color: white; border-radius: 5px 5px 0 0;">Tus notificaciones</h4>
+                    <ul id="lista-notificaciones" style="list-style: none; margin: 0; padding: 0;">
+                        <li class="notif-vacia">Cargando...</li>
+                    </ul>
+                    <div style="padding: 8px; text-align: center; border-top: 1px solid #eee;">
+                        <a href="#" id="link-ver-todas" style="color: #003366; font-weight: bold; font-size: 13px; text-decoration: none;">Ver todas</a>
+                    </div>
+                </div>
+            </div>
+
             <span id="nombre-estudiante">Cargando estudiante...</span>
             <button id="btn-cerrar-sesion" class="btn-logout">Cerrar Sesión</button>
         </div>
     </nav>
 
-    <main class="dashboard-container">
-        <header class="dashboard-header" style="margin-bottom: 20px;">
-            <h1 style="color: #000;">Bienvenido a tu Panel de Estudiante</h1>
-            <p style="color: #000; font-size: 16px;">Carrera: <strong id="carrera-estudiante">Cargando...</strong></p>
-        </header>
+    <!-- Contenedor Principal Dividido -->
+    <div class="layout-estudiante">
 
-        <div class="dashboard-cards">
-            <!-- Tarjeta 1: Progreso -->
-            <div class="card">
-                <h3>Horas Registradas</h3>
-                <p class="big-number" style="color: #0056b3;" id="texto-progreso">0 / 0</p>
-                <div id="badge-empresa" style="background-color: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 4px; display: inline-block; font-size: 14px; margin-top: 10px; border: 1px solid #ffeeba;">
-                    Pendiente de asignación de empresa
+        <!-- Menú Lateral -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="menu-item activo" data-target="sec-inicio">Inicio</li>
+                <li class="menu-item" data-target="sec-historial" id="menu-historial">Mi Historial</li>
+                <li class="menu-item" data-target="sec-ofertas" id="menu-ofertas">Ofertas de Pasantías</li>
+                <li class="menu-item" data-target="sec-notificaciones" id="menu-notificaciones">
+                    <span>Notificaciones</span>
+                    <span id="menu-badge-notif" class="menu-badge">0</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Contenido Derecho -->
+        <main class="main-content">
+
+            <!-- Sección 1: INICIO (Vista por defecto) -->
+            <div id="sec-inicio" class="seccion-estudiante activa">
+                <header class="dashboard-header" style="margin-bottom: 30px;">
+                    <h1 style="color: #000; margin-bottom: 10px;">Bienvenido a tu Panel de Estudiante</h1>
+                    <p style="color: #666; font-size: 16px; margin: 0;">Carrera: <strong id="carrera-estudiante" style="color: #003366;">Cargando...</strong></p>
+                </header>
+
+                <div class="dashboard-cards" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div class="card" style="flex: 1; min-width: 250px; margin-top: 0;">
+                        <h3 style="color: #003366; margin-bottom: 15px;">Horas Registradas</h3>
+                        <p class="big-number" style="color: #0056b3; font-size: 36px; font-weight: bold; margin: 10px 0;" id="texto-progreso">0 / 0</p>
+                        <div id="badge-empresa" style="background-color: #fff3cd; color: #856404; padding: 8px 12px; border-radius: 4px; display: inline-block; font-size: 14px; margin-top: 15px; border: 1px solid #ffeeba;">
+                            Pendiente de asignación de empresa
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1; min-width: 250px; margin-top: 0;">
+                        <h3 style="color: #003366; margin-bottom: 15px;">Acciones Rápidas</h3>
+                        <!-- El registro de horas solo aparece cuando el estudiante ya tiene empresa -->
+                        <p id="mensaje-no-vinculado" style="color: #dc3545; font-weight: bold; font-size: 14px; margin-bottom: 10px;">Debes estar vinculado a una empresa para registrar horas.</p>
+                        <button class="btn-action" id="btn-abrir-registro" style="display: none; background-color: #28a745; color: white; margin-bottom: 20px; border: none; padding: 12px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: bold;">⏳ Registrar nuevas horas</button>
+
+                        <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #dc3545; font-size: 15px;">¿Problemas en tu práctica?</h4>
+                            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Reporta si te piden realizar actividades fuera de tu profesión.</p>
+                            <button class="btn-danger" id="btn-abrir-alerta" style="width: 100%; background-color: #dc3545; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Generar Alerta</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1; min-width: 280px; margin-top: 0;">
+                        <h3 style="color: #003366; margin-bottom: 15px;">Últimas notificaciones</h3>
+                        <ul id="inicio-notificaciones" style="list-style: none; margin: 0; padding: 0;">
+                            <li class="notif-vacia">Cargando...</li>
+                        </ul>
+                        <p style="margin: 12px 0 0 0; text-align: right;">
+                            <a href="#" id="link-ver-todas-inicio" style="color: #003366; font-weight: bold; font-size: 13px; text-decoration: none;">Ver todas</a>
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tarjeta 2: Acciones -->
-            <div class="card">
-                <h3>Acciones</h3>
-                <button class="btn-action" id="btn-abrir-registro" style="background-color: #e9ecef; color: #333; margin-bottom: 10px; border: 1px solid #ccc;">Registrar nuevas horas</button>
-                <button class="btn-action" id="btn-abrir-historial" style="background-color: #e9ecef; color: #333; border: 1px solid #ccc;">Ver mi historial</button>
-            </div>
-            
-            <!-- Tarjeta 3: Alertas -->
-            <div class="card alert-card">
-                <h3>¿Problemas en tu práctica?</h3>
-                <p>Si sufres acoso o te piden realizar actividades fuera de tu profesión, repórtalo aquí.</p>
-                <button class="btn-danger" id="btn-abrir-alerta">Generar Alerta</button>
-            </div>
-        </div>
-    </main>
+            <!-- Sección 2: Mi Historial -->
+			<div id="sec-historial" class="seccion-estudiante">
+				<h1 style="color: #000; margin-bottom: 20px;">Mi Historial de Actividades</h1>
+				
+				<div class="card" style="margin-top: 0;">
+					
+					<!-- Tarjetas de resumen (NUEVO) -->
+					<div class="resumen-horas">
+						<div class="resumen-item" style="border-top-color: #28a745;"><strong id="res-aprobadas-est" style="color: #28a745;">0</strong><span>Horas aprobadas</span></div>
+						<div class="resumen-item" style="border-top-color: #ffc107;"><strong id="res-pendientes-est" style="color: #c79100;">0</strong><span>Por validar</span></div>
+						<div class="resumen-item" style="border-top-color: #dc3545;"><strong id="res-rechazadas-est" style="color: #dc3545;">0</strong><span>Rechazadas</span></div>
+						<div class="resumen-item" style="border-top-color: #003366;"><strong id="res-faltantes-est" style="color: #003366;">0</strong><span>Horas que faltan</span></div>
+					</div>
 
-    <!-- Modal Registrar Horas -->
+					<!-- Barra de progreso (NUEVO) -->
+					<div style="margin-bottom: 25px;">
+						<div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 5px;">
+							<span id="texto-avance-est">0 de 0 horas aprobadas</span>
+							<span id="texto-porcentaje-est">0%</span>
+						</div>
+						<div class="barra"><div id="barra-avance-est"></div></div>
+					</div>
+
+					<!-- Filtro y Tabla -->
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
+						<h3 style="margin: 0; color: #003366;">Registros Detallados</h3>
+						<select id="filtro-estado-est" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+							<option value="">Todos los estados</option>
+							<option value="Aprobada">Aprobadas</option>
+							<option value="Pendiente">Por validar</option>
+							<option value="Rechazada">Rechazadas</option>
+						</select>
+					</div>
+
+					<div style="overflow-x: auto;">
+						<table class="tabla-historial" style="width: 100%; border-collapse: collapse;">
+							<thead>
+								<tr style="background-color: #003366; color: white;">
+									<th style="padding: 12px; text-align: left;">Fecha</th>
+									<th style="padding: 12px; text-align: center;">Horas</th>
+									<th style="padding: 12px; text-align: left;">Actividad</th>
+									<th style="padding: 12px; text-align: center;">Estado</th>
+								</tr>
+							</thead>
+							<tbody id="tbody-historial-estudiante">
+								<tr><td colspan="4" style="text-align: center; padding: 20px;">Cargando historial...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+            <!-- Sección 3: OFERTAS DISPONIBLES -->
+            <div id="sec-ofertas" class="seccion-estudiante">
+                <h1 style="color: #000; margin-bottom: 20px;">Ofertas Disponibles para tu Carrera</h1>
+                <div class="card" style="margin-top: 0;">
+                    <table class="tabla-historial" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #003366; color: white;">
+                                <th style="padding: 12px; text-align: left;">Empresa</th>
+                                <th style="padding: 12px; text-align: left;">Puesto</th>
+                                <th style="padding: 12px; text-align: center;">Cupos</th>
+                                <th style="padding: 12px; text-align: center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-ofertas-estudiante">
+                            <tr><td colspan="4" style="text-align: center; padding: 20px;">Cargando ofertas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección 4: NOTIFICACIONES -->
+            <div id="sec-notificaciones" class="seccion-estudiante">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h1 style="color: #000; margin: 0;">Mis Notificaciones</h1>
+                    <button id="btn-marcar-todas" style="background-color: #003366; color: white; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">Marcar todas como leídas</button>
+                </div>
+                <div class="card" style="margin-top: 0; padding: 0; overflow: hidden;">
+                    <ul id="lista-notificaciones-seccion" style="list-style: none; margin: 0; padding: 0;">
+                        <li class="notif-vacia">Cargando...</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODALES FLOTANTES -->
+
     <div id="modal-registrar-horas" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <span class="close-btn" id="close-registrar-horas">&times;</span>
             <h2 style="color: #003366; margin-bottom: 20px;">Registrar Horas</h2>
             <form id="form-registro-horas">
-                <div class="form-group">
-                    <label>Fecha de la actividad:</label>
-                    <input type="date" id="hora-fecha" required>
-                </div>
-                <div class="form-group">
-                    <label>Horas realizadas (Ej. 4.5):</label>
-                    <input type="number" id="hora-cantidad" step="0.1" min="0.1" max="12" required>
-                </div>
-                <div class="form-group">
-                    <label>Descripción de actividades:</label>
-                    <textarea id="hora-descripcion" rows="4" required placeholder="Describe brevemente lo que hiciste..."></textarea>
-                </div>
+                <div class="form-group"><label>Fecha:</label><input type="date" id="hora-fecha" required></div>
+                <div class="form-group"><label>Horas realizadas:</label><input type="number" id="hora-cantidad" step="0.1" min="0.1" max="12" required></div>
+                <div class="form-group"><label>Descripción de actividades:</label><textarea id="hora-descripcion" rows="4" required placeholder="Describe lo que hiciste..."></textarea></div>
                 <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 10px;">Enviar a validación</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Historial de Horas -->
-    <div id="modal-historial" class="modal">
-        <div class="modal-content" style="max-width: 700px;">
-            <span class="close-btn" id="close-historial">&times;</span>
-            <h2 style="color: #003366; margin-bottom: 20px;">Mi Historial de Actividades</h2>
-            <table class="tabla-historial">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Horas</th>
-                        <th>Actividad</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-historial-estudiante">
-                    <tr><td colspan="4" style="text-align: center;">Cargando historial...</td></tr>
-                </tbody>
-            </table>
+    <div id="modal-postular" class="modal" style="z-index: 1050;">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-btn" id="close-postular">&times;</span>
+            <h2 style="color: #003366; margin-bottom: 10px;">Postular a Vacante</h2>
+            <p id="postular-titulo-oferta" style="font-weight: bold; margin-bottom: 20px; color: #555; border-bottom: 1px solid #ccc; padding-bottom: 10px;"></p>
+            <form id="form-postulacion" enctype="multipart/form-data">
+                <input type="hidden" id="postulacion-oferta-id">
+                <div class="form-group">
+                    <label style="font-weight: bold;">Sube tu CV (PDF):</label>
+                    <input type="file" id="postulacion-cv" accept="application/pdf" required style="margin-top: 10px; width: 100%;">
+                </div>
+                <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 15px; background-color: #28a745;">🚀 Enviar Postulación</button>
+            </form>
         </div>
     </div>
 
+    <div id="modal-detalles-oferta" class="modal" style="z-index: 1060;">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-detalles-oferta">&times;</span>
+            <h2 id="detalles-titulo" style="color: #003366; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px;">Detalles de la Oferta</h2>
+            <div style="margin-bottom: 15px;"><label style="font-weight: bold; color: #555;">Empresa:</label><p id="detalles-empresa" style="margin: 0; font-size: 16px;"></p></div>
+            <div style="margin-bottom: 15px;"><label style="font-weight: bold; color: #555;">Carrera Requerida:</label><p id="detalles-carrera" style="margin: 0; font-size: 16px;"></p></div>
+            <div style="margin-bottom: 15px;"><label style="font-weight: bold; color: #555;">Cupos Disponibles:</label><p id="detalles-cupos" style="margin: 0; font-size: 16px; color: #0056b3; font-weight: bold;"></p></div>
+            <div style="margin-bottom: 15px;"><label style="font-weight: bold; color: #555;">Fecha de Publicación:</label><p id="detalles-fecha" style="margin: 0; font-size: 16px;"></p></div>
+            <div style="margin-bottom: 20px;"><label style="font-weight: bold; color: #555;">Descripción de Actividades:</label><p id="detalles-descripcion" style="margin: 0; font-size: 15px; background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #ddd;"></p></div>
+            <button type="button" onclick="document.getElementById('modal-detalles-oferta').style.display='none'" style="width: 100%; background-color: #003366; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Navegación del menú lateral. irASeccion también la usan los enlaces "Ver todas".
+        window.irASeccion = (idSeccion) => {
+            document.querySelectorAll('.menu-item').forEach(btn => {
+                btn.classList.toggle('activo', btn.getAttribute('data-target') === idSeccion);
+            });
+            document.querySelectorAll('.seccion-estudiante').forEach(sec => {
+                sec.classList.toggle('activa', sec.id === idSeccion);
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', () => window.irASeccion(item.getAttribute('data-target')));
+            });
+        });
+    </script>
     <script src="js/dashboard-estudiante.js"></script>
 </body>
 </html>

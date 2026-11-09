@@ -50,7 +50,7 @@
             <button id="btn-tab-convenios" class="btn-tab activo" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #003366; color: white; font-size: 16px;">Convenios</button>
             <button id="btn-tab-estudiantes" class="btn-tab" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #e9ecef; color: #333; font-size: 16px;">Estudiantes</button>
             <button id="btn-tab-tutores" class="btn-tab" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #e9ecef; color: #333; font-size: 16px;">Tutores</button>
-        </div>
+            <button id="btn-tab-notificaciones" class="btn-tab" style="padding: 10px 25px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px 5px 0 0; background-color: #e9ecef; color: #333; font-size: 16px;">🔔 Notificaciones <span id="badge-notificaciones-admin" style="display: none; background: #dc3545; color: white; border-radius: 10px; padding: 2px 8px; font-size: 12px; margin-left: 6px;">0</span></button>
         </div>
 
         
@@ -156,6 +156,29 @@
                 </thead>
                 <tbody id="tbody-tutores">
                     <tr><td colspan="7" style="text-align: center;">Cargando tutores...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- SECCIÓN 4: NOTIFICACIONES (solicitudes de incorporación enviadas por tutores) -->
+        <div id="seccion-notificaciones" class="card" style="margin-top: 0; border-top-left-radius: 0; overflow-x: auto; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">Solicitudes de incorporación pendientes</h3>
+                <button id="btn-actualizar-notificaciones" style="background: none; border: none; font-size: 22px; cursor: pointer; padding: 0;" title="Actualizar">🔄</button>
+            </div>
+
+            <table class="tabla-historial" id="tabla-notificaciones">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Estudiante</th>
+                        <th>Detalle de la solicitud</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-notificaciones">
+                    <tr><td colspan="4" style="text-align: center;">Cargando solicitudes...</td></tr>
                 </tbody>
             </table>
         </div>

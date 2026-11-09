@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Tutor - Prácticas UNIB.E</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* RESET Y LAYOUT PRINCIPAL */
+        body.dashboard-body {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #f4f7f6;
+        }
+
+        .navbar {
+            width: 100%;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #003366;
+            color: white;
+        }
+
+        .navbar h2 { margin: 0; font-size: 22px; }
+
+        .user-menu { display: flex; align-items: center; gap: 25px; }
+
+        .layout-tutor { display: flex; flex: 1; width: 100%; overflow: hidden; }
+
+        .sidebar {
+            width: 260px;
+            min-width: 260px;
+            background-color: #ffffff;
+            border-right: 3px solid #003366;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            margin: 0 !important;
+        }
+
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+
+        .sidebar-menu li {
+            padding: 20px;
+            font-size: 16px;
+            color: #333;
+            border-bottom: 2px solid #003366;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-menu li:hover { background-color: #f0f4f8; }
+        .sidebar-menu li.activo { background-color: #003366; color: white; font-weight: bold; }
+
+        .menu-badge { background: #dc3545; color: white; border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; display: none; }
+
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; background-color: #f4f7f6; }
+
+        .seccion-tutor { display: none; }
+        .seccion-tutor.activa { display: block; }
+
+        /* VENTANAS EMERGENTES */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .overlay.sobre { z-index: 1100; }
+        .overlay-caja {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        /* CSS CORREGIDO DEL BOTÓN DE CERRAR EN BLANCO */
+        .btn-cerrar-modal {
+            position: absolute; 
+            top: 15px; 
+            right: 15px;
+            background-color: #dc3545; 
+            color: white; 
+            border: none;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 4px; 
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            z-index: 10;
+        }
+        .btn-cerrar-modal:hover { background-color: #c82333; }
+
+        /* Resumen de horas del pasante */
+        .resumen-horas { display: flex; gap: 12px; flex-wrap: wrap; margin: 15px 0; }
+        .resumen-item { flex: 1; min-width: 120px; background: #f4f7f6; border-radius: 6px; padding: 12px; text-align: center; border-top: 4px solid #ccc; }
+        .resumen-item strong { display: block; font-size: 24px; margin-bottom: 2px; }
+        .resumen-item span { font-size: 13px; color: #555; }
+        .barra { background: #e9ecef; border-radius: 6px; height: 12px; overflow: hidden; }
+        .barra > div { background: #28a745; height: 100%; width: 0; transition: width 0.4s; }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <!-- Barra de Navegación Superior -->
+    <nav class="navbar">
+        <h2>Panel de Tutor Empresarial</h2>
+        <div class="user-menu">
+            <span id="nombre-tutor">Cargando...</span>
+            <button id="btn-cerrar-sesion" class="btn-logout" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <!-- Contenedor Dividido -->
+    <div class="layout-tutor">
+
+        <!-- MENÚ LATERAL IZQUIERDO -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="menu-item activo" data-target="sec-crear">Crear Pasantía</li>
+                <li class="menu-item" data-target="sec-existentes">Pasantías Existentes</li>
+                <li class="menu-item" data-target="sec-pasantes">Pasantes</li>
+                <li class="menu-item" data-target="sec-validacion">
+                    <span>Validación de Horas</span>
+                    <span id="badge-pendientes" class="menu-badge">0</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- PANEL DE CONTENIDO DERECHO -->
+        <main class="main-content">
+
+            <header class="dashboard-header" style="margin-bottom: 25px;">
+                <p style="color: #666; font-size: 16px; margin: 0;">Empresa: <strong id="empresa-tutor" style="color: #003366;">Cargando...</strong></p>
+                <p id="aviso-sin-empresa" style="display: none; margin: 10px 0 0 0; padding: 10px 14px; background: #f8d7da; color: #721c24; border-radius: 4px; font-weight: bold;">
+                    Tu cuenta no está vinculada a ninguna empresa. Contacta a Coordinación.
+                </p>
+            </header>
+
+            <!-- Sección 1: Crear Pasantía -->
+            <div id="sec-crear" class="seccion-tutor activa">
+                <h1 style="color: #000; margin-bottom: 20px;">Crear Nueva Oferta de Pasantía</h1>
+                <div class="card" style="margin-top: 0; max-width: 600px;">
+                    <form id="form-crear-pasantia">
+                        <div class="form-group">
+                            <label>Título del puesto:</label>
+                            <input type="text" id="oferta-titulo" placeholder="Ej. Desarrollador Junior" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción de actividades:</label>
+                            <textarea id="oferta-descripcion" rows="4" placeholder="Detalla lo que hará el pasante..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Carrera requerida:</label>
+                            <select id="select-carrera-oferta" required>
+                                <option value="">Cargando carreras...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad de pasantes requeridos (Cupos):</label>
+                            <input type="number" id="oferta-cupos" min="1" value="1" required>
+                        </div>
+                        <button type="submit" class="btn-enviar" style="width: 100%; margin-top: 15px;">Publicar Oferta</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección 2: Pasantías Existentes -->
+            <div id="sec-existentes" class="seccion-tutor">
+                <h1 style="color: #000; margin-bottom: 20px;">Pasantías Existentes</h1>
+                <div class="card" style="margin-top: 0;">
+                    <table class="tabla-historial" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #003366; color: white;">
+                                <th style="padding: 12px; text-align: left;">Puesto</th>
+                                <th style="padding: 12px; text-align: left;">Carrera</th>
+                                <th style="padding: 12px; text-align: center;">Cupos</th>
+                                <th style="padding: 12px; text-align: center;">Postulantes</th>
+                                <th style="padding: 12px; text-align: center;">Estado</th>
+                                <th style="padding: 12px; text-align: center;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-ofertas">
+                            <tr><td colspan="6" style="text-align: center; padding: 20px;">Cargando ofertas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección 3: Pasantes -->
+            <div id="sec-pasantes" class="seccion-tutor">
+                <h1 style="color: #000; margin-bottom: 20px;">Mis Pasantes Asignados</h1>
+                <div class="card" style="margin-top: 0; overflow-x: auto;">
+                    <table class="tabla-historial" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #003366; color: white;">
+                                <th style="padding: 12px; text-align: left;">Cédula</th>
+                                <th style="padding: 12px; text-align: left;">Nombres y Apellidos</th>
+                                <th style="padding: 12px; text-align: left;">Carrera</th>
+                                <th style="padding: 12px; text-align: left;">Tiempo Asignado</th>
+                                <th style="padding: 12px; text-align: center;">Horas Aprobadas</th>
+                                <th style="padding: 12px; text-align: center;">Por Validar</th>
+                                <th style="padding: 12px; text-align: center; width: 130px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-pasantes">
+                            <tr><td colspan="7" style="text-align: center; padding: 20px;">Cargando pasantes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección 4: Validación de Horas -->
+            <div id="sec-validacion" class="seccion-tutor">
+                <h1 style="color: #000; margin-bottom: 20px;">Validación de Horas</h1>
+                <div class="card" style="margin-top: 0; overflow-x: auto;">
+                    <h3>Horas pendientes de revisión</h3>
+                    <table class="tabla-historial" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background-color: #003366; color: white;">
+                                <th style="padding: 12px; text-align: left;">Fecha</th>
+                                <th style="padding: 12px; text-align: left;">Estudiante</th>
+                                <th style="padding: 12px; text-align: left;">Actividad</th>
+                                <th style="padding: 12px; text-align: center;">Hrs</th>
+                                <th style="padding: 12px; text-align: center; width: 120px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-horas-pendientes">
+                            <tr><td colspan="5" style="text-align: center; padding: 20px;">Cargando horas pendientes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL: POSTULANTES -->
+    <div id="modal-postulantes" class="overlay">
+        <div class="overlay-caja" style="max-width: 950px;">
+            <!-- BOTÓN ACTUALIZADO -->
+            <button class="btn-cerrar-modal" onclick="document.getElementById('modal-postulantes').style.display='none'" title="Cerrar">&times;</button>
+
+            <h2 id="modal-titulo-oferta" style="margin-top: 0; color: #003366; border-bottom: 2px solid #eee; padding-bottom: 10px;">Postulantes de la oferta</h2>
+
+            <table class="tabla-historial" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background-color: #003366; color: white;">
+                        <th style="padding: 12px; text-align: left;">Candidato</th>
+                        <th style="padding: 12px; text-align: left;">Cédula</th>
+                        <th style="padding: 12px; text-align: center;">Fecha de postulación</th>
+                        <th style="padding: 12px; text-align: center;">CV</th>
+                        <th style="padding: 12px; text-align: center;">Estado</th>
+                        <th style="padding: 12px; text-align: center; width: 150px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-postulantes">
+                    <tr><td colspan="6" style="text-align: center; padding: 20px;">Cargando postulantes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL: HORAS REGISTRADAS DE UN PASANTE -->
+    <div id="modal-historial" class="overlay">
+        <div class="overlay-caja" style="max-width: 900px;">
+            <!-- BOTÓN ACTUALIZADO -->
+            <button class="btn-cerrar-modal" onclick="document.getElementById('modal-historial').style.display='none'" title="Cerrar">&times;</button>
+
+            <h2 id="historial-titulo" style="margin: 0 0 5px 0; color: #003366;">Horas registradas</h2>
+            <p id="historial-subtitulo" style="margin: 0; color: #666; font-size: 14px;"></p>
+
+            <div class="resumen-horas">
+                <div class="resumen-item" style="border-top-color: #28a745;"><strong id="res-aprobadas" style="color: #28a745;">0</strong><span>Horas aprobadas</span></div>
+                <div class="resumen-item" style="border-top-color: #ffc107;"><strong id="res-pendientes" style="color: #c79100;">0</strong><span>Por validar</span></div>
+                <div class="resumen-item" style="border-top-color: #dc3545;"><strong id="res-rechazadas" style="color: #dc3545;">0</strong><span>Rechazadas</span></div>
+                <div class="resumen-item" style="border-top-color: #003366;"><strong id="res-faltantes" style="color: #003366;">0</strong><span>Horas que le faltan</span></div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 5px;">
+                    <span id="texto-avance">0 de 0 horas aprobadas</span>
+                    <span id="texto-porcentaje">0%</span>
+                </div>
+                <div class="barra"><div id="barra-avance"></div></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
+                <h3 style="margin: 0; color: #003366;">Actividades</h3>
+                <select id="filtro-estado-historial" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="">Todos los estados</option>
+                    <option value="Aprobada">Aprobadas</option>
+                    <option value="Pendiente">Por validar</option>
+                    <option value="Rechazada">Rechazadas</option>
+                </select>
+            </div>
+
+            <table class="tabla-historial" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #003366; color: white;">
+                        <th style="padding: 10px; text-align: left;">Fecha</th>
+                        <th style="padding: 10px; text-align: center;">Horas</th>
+                        <th style="padding: 10px; text-align: left;">Actividad</th>
+                        <th style="padding: 10px; text-align: center;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-historial-pasante">
+                    <tr><td colspan="4" style="text-align: center; padding: 20px;">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL: MOTIVO (se usa al desvincular un pasante y al rechazar horas) -->
+    <div id="modal-motivo" class="overlay sobre">
+        <div class="overlay-caja" style="max-width: 480px;">
+            <h2 id="motivo-titulo" style="margin: 0 0 8px 0; color: #003366;">Motivo</h2>
+            <p id="motivo-descripcion" style="margin: 0 0 15px 0; color: #555; font-size: 14px;"></p>
+            <textarea id="motivo-texto" rows="4" maxlength="300" placeholder="Escribe el motivo..." style="width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;"></textarea>
+            <p id="motivo-error" style="display: none; color: #dc3545; font-size: 13px; margin: 6px 0 0 0;">Escribe un motivo de al menos 5 caracteres.</p>
+            <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                <button id="motivo-cancelar" style="background: #6c757d; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancelar</button>
+                <button id="motivo-confirmar" style="background: #dc3545; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard-tutor.js"></script>
+</body>
+</html>
